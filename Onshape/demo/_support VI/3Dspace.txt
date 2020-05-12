@@ -1,0 +1,63 @@
+#!/usr/bin/env pybricks-micropython
+#brickrun -r -- pybricks-micropython
+
+
+
+'''
+connect motors to 
+x- port A
+y- port B
+z- port C
+touch sensor - port 1
+'''
+from pybricks.hubs import EV3Brick
+from pybricks.tools import wait, StopWatch, DataLog
+from pybricks.parameters import Color, Port
+from pybricks.iodevices import AnalogSensor, UARTDevice
+from pybricks.ev3devices import (Motor, TouchSensor,
+          ColorSensor, UltrasonicSensor, GyroSensor)
+# Initialize the EV3
+ev3 = EV3Brick()
+ev3.speaker.beep()
+x=Motor(Port.A)
+y=Motor(Port.B)
+z=Motor(Port.C)
+t=TouchSensor(Port.S1)
+import urequests
+import utime, ubinascii, ujson, urequests
+
+Key='7157a849-3f05-4436-9936-01c430c24774'
+urlBase = "https://pp-1909111719d4.portal.ptc.io/Thingworx/" # Use your ThingWorx URL
+headers = {'Accept':'application/json','Content-Type':'application/json','AppKey':Key}
+def Put(thing, property, type, value):
+     urlValue = urlBase + 'Things/' + thing + '/Properties/*'
+
+     propValue = {property:value}
+     try:
+          response = urequests.put(urlValue,headers=headers,json=propValue)
+          print(response.text)
+          response.close()
+     except:
+          print('error with Put')
+Put('Ev3Data', 'setflag', 'STRING', "reset")
+while True:
+    ev3.screen.clear()
+    width=x.angle()/10
+    length=y.angle()/10
+    height=z.angle()/10
+    ev3.screen.print("width :  ", width)
+    ev3.screen.print("length : ", length)
+    ev3.screen.print("height : ", height)
+    if t.pressed():
+        ev3.screen.clear()
+        ev3.screen.print("UPLOADING!!!")
+        Put('Ev3Data', 'x2', 'NUMBER', width)
+        Put('Ev3Data', 'y2', 'NUMBER', length)
+        Put('Ev3Data', 'extrude', 'NUMBER', height)
+        Put('Ev3Data', 'setflag', 'STRING', "set")
+        ev3.screen.clear()
+        ev3.screen.print("DONE!!! ")
+        wait(100)
+        break
+    wait(100)
+    
